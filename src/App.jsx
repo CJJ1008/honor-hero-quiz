@@ -10,6 +10,7 @@ import {
   HeartHandshake,
   Home,
   Layers3,
+  PlayCircle,
   RefreshCw,
   Search,
   Shield,
@@ -17,6 +18,7 @@ import {
   Swords,
   Target,
   Users,
+  X,
   Zap,
 } from "lucide-react";
 import { heroes } from "./data/heroes";
@@ -354,8 +356,11 @@ function getPersonalityDefinition(topTraits) {
 function getSimilarityText(hero, topTraits) {
   const main = topTraits[0]?.key;
   const second = topTraits[1]?.key;
+  const personaLine = hero.persona
+    ? `你和${hero.name}相似的地方，不是职业位置，而是都带着「${hero.persona.label}」的底层气质：${hero.persona.short}。`
+    : `你和${hero.name}相似的地方，在于都不会只靠单一方式处理问题。`;
   return [
-    hero.desc,
+    personaLine,
     traitSummary[main],
     second ? traitSummary[second] : "",
   ].filter(Boolean).join(" ");
@@ -402,10 +407,11 @@ function getOptionLetter(index) {
 export default function App() {
   const [answers, setAnswers] = useState(Array(questions.length).fill(null));
   const [current, setCurrent] = useState(0);
-  const [page, setPage] = useState("quiz");
+  const [page, setPage] = useState("home");
   const [heroQuery, setHeroQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("全部");
   const [selectedHeroName, setSelectedHeroName] = useState(heroes[0]?.name || "");
+  const [heroDetailOpen, setHeroDetailOpen] = useState(false);
 
   const answeredCount = answers.filter((answer) => answer !== null).length;
   const unansweredIndexes = answers
@@ -441,16 +447,25 @@ export default function App() {
     setAnswers(Array(questions.length).fill(null));
     setCurrent(0);
     setPage("quiz");
+    setHeroDetailOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function goHome() {
+    setPage("home");
+    setHeroDetailOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function goQuiz() {
     setPage("quiz");
+    setHeroDetailOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function goHeroes() {
     setPage("heroes");
+    setHeroDetailOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -462,6 +477,7 @@ export default function App() {
       return;
     }
     setPage("result");
+    setHeroDetailOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -474,50 +490,13 @@ export default function App() {
       <div className="bg-aurora aurora-three" />
 
       <main className="page">
-        <header className="hero-header">
-          <div className="hero-copy">
-            <div className="eyebrow">
-              <Sparkles size={16} />
-              30道生活题 · 4选1 · 覆盖{heroes.length}位王者荣耀英雄
-            </div>
-            <h1>
-              王者荣耀
-              <span>生活人格英雄测评</span>
-            </h1>
-            <p>
-              不问段位、不问位置，只用日常选择、压力反应、协作方式和人生偏好，测出最像你的峡谷英雄人格。
-            </p>
-            <div className="top-nav">
-              <button className={page === "quiz" ? "active" : ""} onClick={goQuiz}>
-                <Home size={16} />
-                开始测评
-              </button>
-              <button className={page === "heroes" ? "active" : ""} onClick={goHeroes}>
-                <Layers3 size={16} />
-                查看英雄池
-              </button>
-              <button disabled={!canShowResult} className={page === "result" ? "active" : ""} onClick={goResult}>
-                <Crown size={16} />
-                我的结果
-              </button>
-            </div>
-          </div>
+        {page === "home" ? (
+          <HomePage heroesCount={heroes.length} onStart={goQuiz} onHeroes={goHeroes} />
+        ) : (
+          <SubPageNav page={page} canShowResult={canShowResult} onHome={goHome} onQuiz={goQuiz} onHeroes={goHeroes} onResult={goResult} />
+        )}
 
-          <div className="header-card">
-            <div className="header-card-top">
-              <Award />
-              <span>全英雄池</span>
-            </div>
-            <strong>{heroes.length}</strong>
-            <small>职业只作为辅助参考，核心匹配会结合每个英雄的人格设定与具体气质。</small>
-            <button onClick={reset} className="ghost-button">
-              <RefreshCw size={16} />
-              重新开始
-            </button>
-          </div>
-        </header>
-
-        {page === "result" && canShowResult ? (
+        {page === "home" ? null : page === "result" && canShowResult ? (
           <ResultPage
             result={result}
             matches={matches}
@@ -537,6 +516,8 @@ export default function App() {
             filteredHeroes={filteredHeroes}
             selectedHero={selectedHero}
             setSelectedHeroName={setSelectedHeroName}
+            heroDetailOpen={heroDetailOpen}
+            setHeroDetailOpen={setHeroDetailOpen}
           />
         ) : (
           <section className="quiz-layout">
@@ -650,6 +631,75 @@ export default function App() {
         </footer>
       </main>
     </div>
+  );
+}
+
+
+function HomePage({ heroesCount, onStart, onHeroes }) {
+  return (
+    <section className="home-screen">
+      <div className="hero-header home-hero-header">
+        <div className="hero-copy">
+          <div className="eyebrow">
+            <Sparkles size={16} />
+            30道生活题 · 4选1 · 覆盖{heroesCount}位王者荣耀英雄
+          </div>
+          <h1>
+            王者荣耀
+            <span>生活人格英雄测评</span>
+          </h1>
+          <p>
+            不问段位、不问位置，只用日常选择、压力反应、协作方式和人生偏好，测出最像你的峡谷英雄人格。
+          </p>
+          <div className="home-actions">
+            <button className="home-primary" onClick={onStart}>
+              <PlayCircle size={20} />
+              开始测评
+            </button>
+            <button className="home-secondary" onClick={onHeroes}>
+              <Layers3 size={19} />
+              查看英雄池
+            </button>
+          </div>
+        </div>
+
+        <div className="header-card home-count-card">
+          <div className="header-card-top">
+            <Award />
+            <span>全英雄池</span>
+          </div>
+          <strong>{heroesCount}</strong>
+          <small>职业只作为辅助参考，核心匹配会结合每个英雄的人格设定与具体气质。</small>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SubPageNav({ page, canShowResult, onHome, onQuiz, onHeroes, onResult }) {
+  const pageTitle = page === "quiz" ? "开始测评" : page === "heroes" ? "英雄池" : "测评结果";
+  return (
+    <header className="sub-nav">
+      <button className="sub-brand" onClick={onHome}>
+        <Crown size={18} />
+        <span>王者英雄测评</span>
+      </button>
+      <div className="sub-title">{pageTitle}</div>
+      <nav className="sub-actions">
+        <button className={page === "quiz" ? "active" : ""} onClick={onQuiz}>
+          <PlayCircle size={15} />
+          测评
+        </button>
+        <button className={page === "heroes" ? "active" : ""} onClick={onHeroes}>
+          <Layers3 size={15} />
+          英雄池
+        </button>
+        <button disabled={!canShowResult} className={page === "result" ? "active" : ""} onClick={onResult}>
+          <Crown size={15} />
+          结果
+        </button>
+      </nav>
+    </header>
   );
 }
 
@@ -787,19 +837,26 @@ function ResultPage({ result, matches, topTraits, scores, maxTraitScore, onBack,
   );
 }
 
-function HeroPoolPage({ roles, roleFilter, setRoleFilter, heroQuery, setHeroQuery, filteredHeroes, selectedHero, setSelectedHeroName }) {
+function HeroPoolPage({ roles, roleFilter, setRoleFilter, heroQuery, setHeroQuery, filteredHeroes, selectedHero, setSelectedHeroName, heroDetailOpen, setHeroDetailOpen }) {
   const selectedColor = getHeroColor(selectedHero);
   const personaKey = getHeroPersonaKey(selectedHero);
   const persona = personalityProfiles[personaKey];
 
+  function handleSelect(heroName) {
+    setSelectedHeroName(heroName);
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 720px)").matches) {
+      setHeroDetailOpen(true);
+    }
+  }
+
   return (
     <section className="hero-pool hero-pool-page">
-      <div className="section-title">
+      <div className="section-title compact-section-title">
         <div>
           <span>Hero Pool</span>
           <h3>当前工程内置英雄池</h3>
         </div>
-        <p>点击任意英雄标签，可以在右侧查看他的 quote、定位和人格设定。匹配算法会参考这些英雄个性，而不只看职业。</p>
+        <p>点击英雄标签查看 quote、定位和人格设定；手机端会弹出详情卡片，不用滑到页面底部找。</p>
       </div>
 
       <div className="pool-toolbar">
@@ -825,7 +882,7 @@ function HeroPoolPage({ roles, roleFilter, setRoleFilter, heroQuery, setHeroQuer
                 type="button"
                 key={hero.name}
                 className={`hero-chip ${getHeroColor(hero)} ${active ? "selected" : ""}`}
-                onClick={() => setSelectedHeroName(hero.name)}
+                onClick={() => handleSelect(hero.name)}
               >
                 <span className="hero-icon">{hero.icon}</span>
                 <div>
@@ -837,25 +894,48 @@ function HeroPoolPage({ roles, roleFilter, setRoleFilter, heroQuery, setHeroQuer
           })}
         </div>
 
-        <aside className={`pool-detail ${selectedColor}`}>
-          <div className="pool-detail-mark">{selectedHero.icon}</div>
-          <div className="pool-detail-head">
-            <div>
-              <span>当前选中英雄</span>
-              <h3>{selectedHero.name}</h3>
-              <p>{roleText(selectedHero.roles)} · {persona.label}</p>
-            </div>
-            <Users size={28} />
-          </div>
-          <p className="pool-quote">“{selectedHero.quote}”</p>
-          <p className="pool-desc">{selectedHero.desc}</p>
-          <div className="pool-persona">
-            <strong>算法人格标签</strong>
-            <span>{persona.short}</span>
-          </div>
+        <aside className={`pool-detail desktop-pool-detail ${selectedColor}`}>
+          <HeroDetailContent selectedHero={selectedHero} persona={persona} onClose={null} />
         </aside>
       </div>
+
+      {heroDetailOpen && (
+        <div className="mobile-hero-sheet" role="dialog" aria-modal="true" aria-label={`${selectedHero.name}英雄详情`}>
+          <button className="sheet-backdrop" onClick={() => setHeroDetailOpen(false)} aria-label="关闭英雄详情" />
+          <aside className={`pool-detail sheet-panel ${selectedColor}`}>
+            <HeroDetailContent selectedHero={selectedHero} persona={persona} onClose={() => setHeroDetailOpen(false)} />
+          </aside>
+        </div>
+      )}
     </section>
+  );
+}
+
+function HeroDetailContent({ selectedHero, persona, onClose }) {
+  return (
+    <>
+      <div className="pool-detail-mark">{selectedHero.icon}</div>
+      <div className="pool-detail-head">
+        <div>
+          <span>当前选中英雄</span>
+          <h3>{selectedHero.name}</h3>
+          <p>{roleText(selectedHero.roles)} · {persona.label}</p>
+        </div>
+        {onClose ? (
+          <button className="sheet-close" onClick={onClose} aria-label="关闭">
+            <X size={20} />
+          </button>
+        ) : (
+          <Users size={28} />
+        )}
+      </div>
+      <p className="pool-quote">“{selectedHero.quote}”</p>
+      <p className="pool-desc">{selectedHero.desc}</p>
+      <div className="pool-persona">
+        <strong>算法人格标签</strong>
+        <span>{persona.short}</span>
+      </div>
+    </>
   );
 }
 

@@ -1359,3 +1359,235 @@ footer {
     max-height: 520px;
   }
 }
+
+/* --- Home screen and compact sub pages --- */
+.home-screen {
+  min-height: calc(100vh - 90px);
+  display: grid;
+  align-items: center;
+}
+
+.home-hero-header {
+  margin-bottom: 0;
+}
+
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.home-primary,
+.home-secondary {
+  min-height: 54px;
+  border: 0;
+  border-radius: 20px;
+  padding: 0 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 950;
+  transition: 180ms ease;
+}
+
+.home-primary {
+  color: #0f172a;
+  background: linear-gradient(90deg, #fde68a, #f0abfc, #93c5fd);
+  box-shadow: 0 20px 52px rgba(217, 70, 239, 0.22);
+}
+
+.home-secondary {
+  color: white;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.home-primary:hover,
+.home-secondary:hover {
+  transform: translateY(-2px);
+}
+
+.sub-nav {
+  min-height: 62px;
+  margin-bottom: 18px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.075);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
+}
+
+.sub-brand,
+.sub-actions button {
+  border: 1px solid var(--line);
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-weight: 900;
+  transition: 160ms ease;
+}
+
+.sub-brand {
+  min-height: 42px;
+  border-radius: 16px;
+  padding: 0 14px;
+}
+
+.sub-title {
+  color: #dbeafe;
+  font-size: 14px;
+  font-weight: 950;
+  text-align: center;
+  letter-spacing: 0.08em;
+}
+
+.sub-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sub-actions button {
+  min-height: 40px;
+  border-radius: 999px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.sub-brand:hover,
+.sub-actions button:hover:not(:disabled),
+.sub-actions button.active {
+  transform: translateY(-1px);
+  color: #0f172a;
+  background: linear-gradient(90deg, #fde68a, #a5f3fc);
+}
+
+.sub-actions button:disabled {
+  opacity: 0.42;
+}
+
+.compact-section-title {
+  margin-bottom: 14px;
+}
+
+.compact-section-title h3 {
+  font-size: 24px;
+}
+
+/* --- Mobile hero detail sheet --- */
+.mobile-hero-sheet {
+  display: none;
+}
+
+.sheet-close {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 720px) {
+  .desktop-pool-detail {
+    display: none;
+  }
+
+  .mobile-hero-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    align-items: end;
+  }
+
+  .sheet-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(2, 6, 23, 0.58);
+    backdrop-filter: blur(6px);
+  }
+
+  .sheet-panel {
+    position: relative;
+    top: auto;
+    width: min(100% - 20px, 520px);
+    max-height: min(78vh, 620px);
+    margin: 0 auto max(10px, env(safe-area-inset-bottom));
+    overflow: auto;
+    border-radius: 28px 28px 24px 24px;
+    animation: sheetUp 180ms ease both;
+  }
+
+  @keyframes sheetUp {
+    from {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+@media (max-width: 620px) {
+  .home-screen {
+    min-height: auto;
+    padding-top: 16px;
+  }
+
+  .home-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .home-primary,
+  .home-secondary {
+    width: 100%;
+  }
+
+  .sub-nav {
+    grid-template-columns: 1fr;
+    border-radius: 22px;
+  }
+
+  .sub-brand {
+    width: 100%;
+  }
+
+  .sub-title {
+    display: none;
+  }
+
+  .sub-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sub-actions button {
+    padding: 0 8px;
+  }
+
+  .compact-section-title h3 {
+    font-size: 22px;
+  }
+
+  .pool-desc,
+  .pool-quote {
+    font-size: 13px;
+  }
+}
